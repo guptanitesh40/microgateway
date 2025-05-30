@@ -6,7 +6,7 @@ proxyBundleVersion="1"
 
 API_PRODUCT_URL="https://api.enterprise.apigee.com/v1/o"
 API_PROXY_URL="https://api.enterprise.apigee.com/v1/organizations"
-
+TOKEN="VAR_TOKEN"
 CURL="curl -q -s"
 
 function logError(){
@@ -29,7 +29,7 @@ function listDevelopers() {
     local ret=0
 
     apiProxyURL="${API_PROXY_URL}/${MOCHA_ORG}/developers" 
-    ${CURL} -H "Content-Type:application/json" -u "$MOCHA_USER":"$MOCHA_PASSWORD" ${apiProxyURL} -D headers.txt -o listDevelopers.txt > /dev/null 2>&1 ; ret=$?
+    ${CURL} -H "Content-Type:application/json" -H "Authorization: Bearer $TOKEN" ${apiProxyURL} -D headers.txt -o listDevelopers.txt > /dev/null 2>&1 ; ret=$?
     result=$(grep HTTP headers.txt | cut -d ' ' -f2)
     if [ ${ret} -eq 0 -a ${result} -eq 200 ]; then
          logInfo "Successfully retrieved developer list with code $result"
@@ -56,7 +56,7 @@ function createDeveloper() {
 
     node substVars "templates/apideveloper-template.json" "devguy" "${apiDeveloper}" > "${apiDeveloper}".json
 
-    ${CURL} -H "Content-Type:application/json" -u "$MOCHA_USER":"$MOCHA_PASSWORD" ${apiProxyURL} -X POST -d @"${apiDeveloper}".json -D headers.txt -o createDeveloper.txt > /dev/null 2>&1 ; ret=$?
+    ${CURL} -H "Content-Type:application/json" -H "Authorization: Bearer $TOKEN" ${apiProxyURL} -X POST -d @"${apiDeveloper}".json -D headers.txt -o createDeveloper.txt > /dev/null 2>&1 ; ret=$?
 
     result=$(grep HTTP headers.txt | cut -d ' ' -f2)
     if [ ${ret} -eq 0 -a ${result} -eq 201 ]; then
@@ -82,7 +82,7 @@ function listDeveloper() {
     apiDeveloper="$1"
 
     apiProxyURL="${API_PROXY_URL}/${MOCHA_ORG}/developers/${apiDeveloper}@google.com"
-    ${CURL} -H "Content-Type:application/json" -u "$MOCHA_USER":"$MOCHA_PASSWORD" ${apiProxyURL} -D headers.txt -o listDeveloper.txt > /dev/null 2>&1 ; ret=$?
+    ${CURL} -H "Content-Type:application/json" -H "Authorization: Bearer $TOKEN" ${apiProxyURL} -D headers.txt -o listDeveloper.txt > /dev/null 2>&1 ; ret=$?
     result=$(grep HTTP headers.txt | cut -d ' ' -f2)
     if [ ${ret} -eq 0 -a ${result} -eq 200 ]; then
          logInfo "Successfully retrieved developer with code $result"
@@ -136,7 +136,7 @@ function listDeveloperApps() {
     apiDeveloper="$1"
 
     apiProxyURL="${API_PROXY_URL}/${MOCHA_ORG}/developers/${apiDeveloper}@google.com/apps"
-    ${CURL} -H "Content-Type:application/json" -u "$MOCHA_USER":"$MOCHA_PASSWORD" ${apiProxyURL} -D headers.txt -o listDeveloperApps.txt > /dev/null 2>&1 ; ret=$?
+    ${CURL} -H "Content-Type:application/json" -H "Authorization: Bearer $TOKEN" ${apiProxyURL} -D headers.txt -o listDeveloperApps.txt > /dev/null 2>&1 ; ret=$?
     result=$(grep HTTP headers.txt | cut -d ' ' -f2)
     if [ ${ret} -eq 0 -a ${result} -eq 200 ]; then
          logInfo "Successfully retrieved developer app list with code $result"
@@ -165,7 +165,7 @@ function createDeveloperApp() {
 
     apiProxyURL="${API_PROXY_URL}/${MOCHA_ORG}/developers/${apiDeveloper}@google.com/apps" 
 
-    ${CURL} -H "Content-Type:application/json" -u "$MOCHA_USER":"$MOCHA_PASSWORD" ${apiProxyURL} -X POST -d @${apiDeveloperApp}.json -D headers.txt -o createDeveloperApp.txt > /dev/null 2>&1 ; ret=$?
+    ${CURL} -H "Content-Type:application/json" -H "Authorization: Bearer $TOKEN" ${apiProxyURL} -X POST -d @${apiDeveloperApp}.json -D headers.txt -o createDeveloperApp.txt > /dev/null 2>&1 ; ret=$?
     result=$(grep HTTP headers.txt | cut -d ' ' -f2)
     if [ ${ret} -eq 0 -a ${result} -eq 201 ]; then
          logInfo "Successfully created developer app with code $result"
@@ -190,7 +190,7 @@ function listDeveloperApp() {
     apiDeveloperApp="$2"
 
     apiProxyURL="${API_PROXY_URL}/${MOCHA_ORG}/developers/${apiDeveloper}@google.com/apps/${apiDeveloperApp}"
-    ${CURL} -H "Content-Type:application/json" -u "$MOCHA_USER":"$MOCHA_PASSWORD" ${apiProxyURL} -D headers.txt -o listDeveloperApp.txt > /dev/null 2>&1 ; ret=$?
+    ${CURL} -H "Content-Type:application/json" -H "Authorization: Bearer $TOKEN" ${apiProxyURL} -D headers.txt -o listDeveloperApp.txt > /dev/null 2>&1 ; ret=$?
     result=$(grep HTTP headers.txt | cut -d ' ' -f2)
     if [ ${ret} -eq 0 -a ${result} -eq 200 ]; then
          logInfo "Successfully retrieved developer app with code $result"
@@ -216,7 +216,10 @@ function getDeveloperApiKey() {
     apiDeveloperApp="$2"
 
     apiProxyURL="${API_PROXY_URL}/${MOCHA_ORG}/developers/${apiDeveloper}@google.com/apps/${apiDeveloperApp}"
-    ${CURL} -H "Content-Type:application/json" -u "$MOCHA_USER":"$MOCHA_PASSWORD" ${apiProxyURL} -D headers.txt -o getDeveloperApiKey.txt > /dev/null 2>&1 ; ret=$?
+
+    ${CURL} -H "Content-Type:application/json" -H "Authorization: Bearer $TOKEN" ${apiProxyURL} -D headers.txt -o getDeveloperApiKey.txt > /dev/null 2>&1 ; ret=$?
+
+#     ${CURL} -H "Content-Type:application/json" -u "$MOCHA_USER":"$MOCHA_PASSWORD" ${apiProxyURL} -D headers.txt -o getDeveloperApiKey.txt > /dev/null 2>&1 ; ret=$?
     result=$(grep HTTP headers.txt | cut -d ' ' -f2)
     if [ ${ret} -eq 0 -a ${result} -eq 200 ]; then
          logInfo "Successfully retrieved developer api key with code $result"
@@ -273,7 +276,7 @@ function listAPIProxy() {
     apiProxyName="$1"
 
     apiProxyURL="${API_PROXY_URL}/${MOCHA_ORG}/apis/${apiProxyName}"
-    ${CURL} -H "Content-Type:application/json" -u "$MOCHA_USER":"$MOCHA_PASSWORD" ${apiProxyURL} -D headers.txt -o listAPIProxy.txt > /dev/null 2>&1 ; ret=$?
+    ${CURL} -H "Content-Type:application/json" -H "Authorization: Bearer $TOKEN" ${apiProxyURL} -D headers.txt -o listAPIProxy.txt > /dev/null 2>&1 ; ret=$?
     result=$(grep HTTP headers.txt | cut -d ' ' -f2)
     if [ ${ret} -eq 0 -a ${result} -eq 200 ]; then
          logInfo "Successfully retrieve API Proxy list with code $result"
@@ -297,7 +300,7 @@ function listAPIProxies() {
 
     apiProxyURL="${API_PROXY_URL}/${MOCHA_ORG}/apis" 
 
-    ${CURL} -H "Content-Type:application/json" -u "$MOCHA_USER":"$MOCHA_PASSWORD" ${apiProxyURL} -D headers.txt -o listAPIProxies.txt > /dev/null 2>&1 ; ret=$?
+    ${CURL} -H "Content-Type:application/json" -H "Authorization: Bearer $TOKEN" ${apiProxyURL} -D headers.txt -o listAPIProxies.txt > /dev/null 2>&1 ; ret=$?
     result=$(grep HTTP headers.txt | cut -d ' ' -f2)
     if [ ${ret} -eq 0 -a ${result} -eq 200 ]; then
          logInfo "Successfully retrieve API Proxies list with code $result"
@@ -322,7 +325,7 @@ function createAPIProxy() {
 
     node substVars "templates/apiproxy-template.json" "proxyName" "$apiProxyName" > "${apiProxyName}".json
 
-    ${CURL} -H "Content-Type:application/json" -u "$MOCHA_USER":"$MOCHA_PASSWORD" ${apiProxyURL} -X POST -d @"${apiProxyName}".json -D headers.txt -o createAPIProxy.txt > /dev/null 2>&1 ; ret=$?
+    ${CURL} -H "Content-Type:application/json" -H "Authorization: Bearer $TOKEN" ${apiProxyURL} -X POST -d @"${apiProxyName}".json -D headers.txt -o createAPIProxy.txt > /dev/null 2>&1 ; ret=$?
     result=$(grep HTTP headers.txt | cut -d ' ' -f2)
     if [ ${ret} -eq 0 -a ${result} -eq 201 ]; then
          logInfo "Successfully created API Proxy with code $result"
@@ -374,7 +377,7 @@ function updateAPIProxy() {
 
     apiProxyURL="${API_PROXY_URL}/${MOCHA_ORG}/apis/${apiProxyName}/revisions/${apiProxyBundleRevision}" 
 
-    ${CURL} -H "Content-Type: multipart/form-data" -u "$MOCHA_USER":"$MOCHA_PASSWORD" ${apiProxyURL} -X POST -F "file=@${apiProxyBundle}" -D headers.txt -o updateAPIProxy.txt > /dev/null 2>&1 ; ret=$?
+    ${CURL} -H "Content-Type: multipart/form-data" -H "Authorization: Bearer $TOKEN" ${apiProxyURL} -X POST -F "file=@${apiProxyBundle}" -D headers.txt -o updateAPIProxy.txt > /dev/null 2>&1 ; ret=$?
     result=$(grep HTTP headers.txt | grep -v 100 | cut -d ' ' -f2)
     if [ ${ret} -eq 0 -a ${result} -eq 200 ]; then
          logInfo "Successfully updated API Proxy with code $result"
@@ -401,7 +404,7 @@ function deployAPIProxy() {
 
     apiProxyURL="${API_PROXY_URL}/${MOCHA_ORG}/environments/${envName}/apis/${apiProxyName}/revisions/${apiProxyBundleRevision}/deployments" 
 
-    ${CURL} -H "Content-Type: application/x-www-form-urlencoded" -u "$MOCHA_USER":"$MOCHA_PASSWORD" ${apiProxyURL} -X POST -D headers.txt -o deployAPIProxy.txt > /dev/null 2>&1 ; ret=$?
+    ${CURL} -H "Content-Type: application/x-www-form-urlencoded" -H "Authorization: Bearer $TOKEN" ${apiProxyURL} -X POST -D headers.txt -o deployAPIProxy.txt > /dev/null 2>&1 ; ret=$?
     result=$(grep HTTP headers.txt | cut -d ' ' -f2)
     if [ ${ret} -eq 0 -a ${result} -eq 200 ]; then
          logInfo "Successfully deployed API Proxy with code $result"
@@ -542,7 +545,7 @@ function createAPIProduct() {
 
     productURL="${API_PRODUCT_URL}/${MOCHA_ORG}/apiproducts"
 
-    ${CURL} -q -s -H "Content-Type:application/json" -X POST -d @"${apiProductName}".json -u "$MOCHA_USER":"$MOCHA_PASSWORD" ${productURL} -D headers.txt -o createAPIProduct.txt > /dev/null 2>&1 ; ret=$?
+    ${CURL} -q -s -H "Content-Type:application/json" -X POST -d @"${apiProductName}".json -H "Authorization: Bearer $TOKEN" ${productURL} -D headers.txt -o createAPIProduct.txt > /dev/null 2>&1 ; ret=$?
     result=$(grep HTTP headers.txt | cut -d ' ' -f2)
     if [ ${ret} -eq 0 -a ${result} -eq 201 ]; then
          logInfo "Successfully created API Product with code $result"
@@ -566,7 +569,7 @@ function listAPIProduct() {
     apiProductName="$1"
 
     productURL="${API_PRODUCT_URL}/${MOCHA_ORG}/apiproducts/${apiProductName}"
-    ${CURL} -q -s -H "Content-Type:application/json" -u "$MOCHA_USER":"$MOCHA_PASSWORD" ${productURL} -D headers.txt -o listAPIProduct.txt > /dev/null 2>&1 ; ret=$?
+    ${CURL} -q -s -H "Content-Type:application/json" -H "Authorization: Bearer $TOKEN" ${productURL} -D headers.txt -o listAPIProduct.txt > /dev/null 2>&1 ; ret=$?
     result=$(grep HTTP headers.txt | cut -d ' ' -f2)
     if [ ${ret} -eq 0 -a ${result} -eq 200 ]; then
          logInfo "Successfully retrieved API Product list with code $result"

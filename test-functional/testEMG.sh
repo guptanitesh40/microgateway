@@ -93,10 +93,11 @@ function initEMG() {
 configureEMG() {
 
   local result=0
-
   logInfo "Configure EMG"
+#   $EDGEMICRO configure -o $MOCHA_ORG -e $MOCHA_ENV -u $MOCHA_USER -p $MOCHA_PASSWORD > edgemicro.configure.txt
+  TOKEN="VAR_TOKEN"
 
-  $EDGEMICRO configure -o $MOCHA_ORG -e $MOCHA_ENV -u $MOCHA_USER -p $MOCHA_PASSWORD > edgemicro.configure.txt
+  $EDGEMICRO configure -o $MOCHA_ORG -e $MOCHA_ENV -u $MOCHA_USER -t $TOKEN > edgemicro.configure.txt
   result=$?
 
   if [ $result -eq 0 ]; then
@@ -170,6 +171,7 @@ startEMG() {
      logError "Failed to retrieve emg key and secret from edgemicro.configure.txt"
      return $result
   fi
+
 
   $EDGEMICRO start -o $MOCHA_ORG -e $MOCHA_ENV -k $EMG_KEY -s $EMG_SECRET -p 1 > edgemicro.logs 2>&1 &
   result=$?
@@ -274,9 +276,10 @@ testAPIProxy() {
   local ret=0
 
   logInfo "Test API Proxy"
-
+  
   apiKey=$(getDeveloperApiKey ${DEVELOPER_NAME} ${DEVELOPER_APP_NAME})
-  curl -q -s http://localhost:8000/v1/${PROXY_NAME} -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
+  curl -q -s http://localhost:8000/${PROXY_NAME} -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
+
   result=$(grep HTTP headers.txt | cut -d ' ' -f2)
   if [ ${ret} -eq 0 -a ${result} -eq 200 ]; then
        logInfo "Successfully tested API Proxy with code $result"
@@ -299,11 +302,11 @@ testQuota() {
   logInfo "Test Quota"
 
   apiKey=$(getDeveloperApiKey ${DEVELOPER_NAME} ${DEVELOPER_APP_NAME})
-
+     echo "apiKey:" + $apiKey;
   counter=1
   while [ $counter -le 10 ]
   do
-    curl -q -s http://localhost:8000/v1/${PROXY_NAME} -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
+    curl -q -s http://localhost:8000/${PROXY_NAME} -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
     #echo $counter
     ((counter++))
   done
@@ -326,7 +329,7 @@ testInvalidAPIKey() {
   logInfo "Test Invalid API Key"
 
   apiKey="API KEY INVALID TO BE BLOCKED"
-  curl -q -s http://localhost:8000/v1/${PROXY_NAME} -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
+  curl -q -s http://localhost:8000/${PROXY_NAME} -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
   result=$(grep HTTP headers.txt | cut -d ' ' -f2)
   if [ ${ret} -eq 0 -a ${result} -eq 403 ]; then
        logInfo "Successfully tested invalid API Key with code $result"
@@ -352,7 +355,7 @@ testInvalidAPIKeyWithUpstreamResp() {
   reloadMicrogatewayNow
 
   apiKey="API KEY INVALID TO BE BLOCKED"
-  curl -q -s http://localhost:8000/v1/${PROXY_NAME} -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
+  curl -q -s http://localhost:8000/${PROXY_NAME} -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
   result=$(grep HTTP headers.txt | cut -d ' ' -f2)
   if [ ${ret} -eq 0 -a ${result} -eq 401 ]; then
        logInfo "Successfully tested invalid API Key with code $result"
@@ -378,7 +381,7 @@ testInvalidAPIKeyWithUpstreamRespFalse() {
   reloadMicrogatewayNow
 
   apiKey="API KEY INVALID TO BE BLOCKED"
-  curl -q -s http://localhost:8000/v1/${PROXY_NAME} -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
+  curl -q -s http://localhost:8000/${PROXY_NAME} -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
   result=$(grep HTTP headers.txt | cut -d ' ' -f2)
   if [ ${ret} -eq 0 -a ${result} -eq 403 ]; then
        logInfo "Successfully tested invalid API Key with code $result"
@@ -400,7 +403,7 @@ testRevokedAPIKey() {
   logInfo "Test Revoked API Key"
 
   apiKey="2UKv8QSMmi5ehtqDShRQPvXBAqEWqPIS"
-  curl -q -s http://localhost:8000/v1/${PROXY_NAME} -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
+  curl -q -s http://localhost:8000/${PROXY_NAME} -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
   result=$(grep HTTP headers.txt | cut -d ' ' -f2)
   if [ ${ret} -eq 0 -a ${result} -eq 403 ]; then
        logInfo "Successfully tested revoked API Key with code $result"
@@ -422,7 +425,7 @@ testInvalidJWT() {
   logInfo "Test Invalid JWT"
 
   apiJWT="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-  curl -q -s http://localhost:8000/v1/${PROXY_NAME} -H "Authorization: Bearer $apiJWT" -D headers.txt > /dev/null 2>&1 ; ret=$?
+  curl -q -s http://localhost:8000/${PROXY_NAME} -H "Authorization: Bearer $apiJWT" -D headers.txt > /dev/null 2>&1 ; ret=$?
   result=$(grep HTTP headers.txt | cut -d ' ' -f2)
   if [ ${ret} -eq 0 -a ${result} -eq 401 ]; then
        logInfo "Successfully tested invalid JWT with code $result"
@@ -445,7 +448,7 @@ testExpiredJWT() {
   logInfo "Test Expired JWT"
 
   apiJWT="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-  curl -q -s http://localhost:8000/v1/${PROXY_NAME} -H "Authorization: Bearer $apiJWT" -D headers.txt > /dev/null 2>&1 ; ret=$?
+  curl -q -s http://localhost:8000/${PROXY_NAME} -H "Authorization: Bearer $apiJWT" -D headers.txt > /dev/null 2>&1 ; ret=$?
   result=$(grep HTTP headers.txt | cut -d ' ' -f2)
   if [ ${ret} -eq 0 -a ${result} -eq 401 ]; then
        logInfo "Successfully tested expired JWT with code $result"
@@ -498,7 +501,7 @@ testInvalidProductNameFilter() {
 
   apiKey=$(getDeveloperApiKey ${DEVELOPER_NAME} ${DEVELOPER_APP_NAME})
 
-  curl -q -s http://localhost:8000/v1/${PROXY_NAME} -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
+  curl -q -s http://localhost:8000/${PROXY_NAME} -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
   result=$(grep HTTP headers.txt | cut -d ' ' -f2)
   if [ ${ret} -eq 0 -a ${result} -eq 200 ]; then
        logInfo "Successfully tested invalid product name filter with code $result"
@@ -603,7 +606,7 @@ testLogFileCreated() {
   logInfo "Check if log file created"
 
   apiKey="API KEY INVALID TO BE LOGGED"
-  curl -q -s http://localhost:8000/v1/${PROXY_NAME} -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
+  curl -q -s http://localhost:8000/${PROXY_NAME} -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
 
   sleep 5
 
@@ -628,7 +631,7 @@ testInvalidApiKeyEventLog() {
   cat /dev/null > $logFilename
 
   apiKey="API KEY INVALID TO BE LOGGED"
-  curl -q -s http://localhost:8000/v1/${PROXY_NAME} -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
+  curl -q -s http://localhost:8000/${PROXY_NAME} -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
 
   sleep 5
 
@@ -675,7 +678,7 @@ testInfoLogs() {
 
   apiKey=$(getDeveloperApiKey ${DEVELOPER_NAME} ${DEVELOPER_APP_NAME})
 
-  curl -q -s http://localhost:8000/v1/${PROXY_NAME} -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
+  curl -q -s http://localhost:8000/${PROXY_NAME} -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
 
   sleep 5
 
@@ -691,7 +694,7 @@ testInfoLogs() {
     logError "Found debug log when config level is info"
   fi
 
-  curl -q -s http://localhost:8000/v1/invalidproxyFortesting -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
+  curl -q -s http://localhost:8000/invalidproxyFortesting -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
 
   sleep 5
 
@@ -737,7 +740,7 @@ testDebugLogs() {
 
   apiKey=$(getDeveloperApiKey ${DEVELOPER_NAME} ${DEVELOPER_APP_NAME})
 
-  curl -q -s http://localhost:8000/v1/${PROXY_NAME} -H "x-api-key: $apiKey-adding-too-log-header-for-testing-$apiKey-$apiKey-$apiKey-$apiKey-$apiKey-$apiKey-$apiKey-$apiKey-$apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
+  curl -q -s http://localhost:8000/${PROXY_NAME} -H "x-api-key: $apiKey-adding-too-log-header-for-testing-$apiKey-$apiKey-$apiKey-$apiKey-$apiKey-$apiKey-$apiKey-$apiKey-$apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
 
   sleep 2
 
@@ -747,7 +750,7 @@ testDebugLogs() {
     logError "Failed to find event debug log"
   fi
 
-  curl -q -s http://localhost:8000/v1/invalidproxyFortesting -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
+  curl -q -s http://localhost:8000/invalidproxyFortesting -H "x-api-key: $apiKey" -D headers.txt > /dev/null 2>&1 ; ret=$?
 
   sleep 5
 
