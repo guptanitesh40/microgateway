@@ -5,7 +5,8 @@ const path = require('path');
 const url = require('url');
 const async = require('async');
 const debug_ = require('debug');
-const request = require('postman-request');
+const https = require('https');
+const http = require('http');
 const _ = require('lodash');
 const default_config_validator = require('./default-validator');
 const proxy_validator = require('./proxy-validator');
@@ -98,7 +99,7 @@ Loader.prototype.get = function(options, callback) {
         const configurl = options.configurl;
 
         if ( (typeof configurl !== 'undefined') && configurl) {
-            request.get(configurl, this, function(error, response, body) {
+            nativeRequest(configurl, function(error, response, body) {
                 if (!error && response.statusCode === 200) {
                     writeConsoleLog('log',{component: CONSOLE_LOG_TAG_COMP},'downloading configuration from: ' + configurl);
                     debug(body);
@@ -264,6 +265,59 @@ function enableTLS(config, opts) {
     return opts;
 }
 
+function nativeRequest(opts, cb) {
+    const urlStr = typeof opts === 'string' ? opts : opts.url;
+    const parsedUrl = url.parse(urlStr);
+    const client = parsedUrl.protocol === 'https:' ? https : http;
+
+    const options = {
+        hostname: parsedUrl.hostname,
+        port: parsedUrl.port,
+        path: parsedUrl.path,
+        method: opts.method || 'GET',
+        headers: opts.headers || {}
+    };
+
+    if (opts.auth) {
+        const auth = Buffer.from(opts.auth.user + ':' + opts.auth.pass).toString('base64');
+        options.headers['Authorization'] = 'Basic ' + auth;
+    }
+
+    const agentOptions = {};
+    if (opts.cert) agentOptions.cert = opts.cert;
+    if (opts.key) agentOptions.key = opts.key;
+    if (opts.ca) agentOptions.ca = opts.ca;
+    if (opts.rejectUnauthorized !== undefined) agentOptions.rejectUnauthorized = opts.rejectUnauthorized;
+    if (opts.pfx) agentOptions.pfx = opts.pfx;
+
+    if (Object.keys(agentOptions).length > 0) {
+        options.agent = new client.Agent(agentOptions);
+    }
+
+    const req = client.request(options, (res) => {
+        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+            const redirectUrl = url.resolve(urlStr, res.headers.location);
+            const redirectOpts = typeof opts === 'string' ? redirectUrl : { ...opts, url: redirectUrl };
+            return nativeRequest(redirectOpts, cb);
+        }
+        let body = '';
+        res.on('data', (chunk) => body += chunk);
+        res.on('end', () => {
+             cb(null, res, body);
+        });
+    });
+
+    req.on('error', (err) => {
+        cb(err);
+    });
+
+    if (opts.body) {
+        req.write(opts.body);
+    }
+
+    req.end();
+}
+
 /**
  * Returns true if JSON is well formed object
  * @param data 
@@ -318,7 +372,7 @@ const processLoad = (config, keys, callback, useSynchronizer, redisClient, sourc
                 _loadStatus('config', config.edge_config.bootstrap, null, response, proxyInfo, cb);
             } else  { //retrieve info from edge
                 if ( useSynchronizer || !config.edge_config.redisBasedConfigCache ) {
-                    request.get(opts, function(err, response, body) {
+                    nativeRequest(opts, function(err, response, body) {
                         if(useSynchronizer && !err && response && response.statusCode === 200 && validateJSON(body)){
                             saveConfigToRedis(redisClient, globalOptions, config.edge_config.bootstrap, body, 'config', (err)=>{
                                 if ( err ) {
@@ -354,7 +408,7 @@ const processLoad = (config, keys, callback, useSynchronizer, redisClient, sourc
                     sendImmediately: true
                 };            
                 opts = enableTLS(config, opts);
-                request.get(opts, function(err, response, body) {
+                nativeRequest(opts, function(err, response, body) {
                     if(useSynchronizer && !err && response && response.statusCode === 200 && validateJSON(body)){
                         saveConfigToRedis(redisClient, globalOptions, config.edge_config.products, body, 'products', (err)=>{
                             if ( err ) {
@@ -382,7 +436,7 @@ const processLoad = (config, keys, callback, useSynchronizer, redisClient, sourc
                 var opts = _.clone(options);
                 opts['url'] = config.edge_config.jwt_public_key;            
                 opts = enableTLS(config, opts);
-                request.get(opts, function(err, response, body) {
+                nativeRequest(opts, function(err, response, body) {
                     if(useSynchronizer && !err && response && response.statusCode === 200){
                         saveConfigToRedis(redisClient, globalOptions, config.edge_config.jwt_public_key, body, 'jwt_public_key', (err)=>{
                             if ( err ) {
@@ -413,7 +467,7 @@ const processLoad = (config, keys, callback, useSynchronizer, redisClient, sourc
                 var opts = _.clone(options);
                 opts['url'] = config.edge_config.jwk_public_keys;            
                 opts = enableTLS(config, opts);
-                request.get(opts, function(err, response, body) {
+                nativeRequest(opts, function(err, response, body) {
                     if(useSynchronizer && !err && response && response.statusCode === 200){
                         saveConfigToRedis(redisClient, globalOptions, config.edge_config.jwk_public_keys, body, 'jwk_public_keys', (err)=>{
                             if ( err ) {
@@ -445,7 +499,7 @@ const processLoad = (config, keys, callback, useSynchronizer, redisClient, sourc
                 var opts = _.clone(options);
                 opts['url'] = config.extauth.publickey_url;            
                 opts = enableTLS(config, opts);
-                request.get(opts, function(err, response, body) {
+                nativeRequest(opts, function(err, response, body) {
                     if(useSynchronizer && !err && response && response.statusCode === 200){
                         saveConfigToRedis(redisClient, globalOptions, config.extauth.public_keys, body, 'extauth_jwk_public_keys', (err)=>{
                             if ( err ) {

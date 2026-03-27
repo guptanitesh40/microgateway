@@ -1,6 +1,5 @@
 'use strict';
 
-var request = require('postman-request');
 var url = require('url');
 var fs = require('fs');
 var run = require('./cli/lib/gateway')();
@@ -45,19 +44,21 @@ if (options.configUrl) {
   
   var parsedUrl = url.parse(options.configUrl, true);
   if (parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:") {
-    request.get(options.configUrl, function(error, response, body) {
-      if (error) {
-        writeConsoleLog('error',{component: CONSOLE_LOG_TAG_COMP},"config file did not download: "+error);
-        process.exit(1);
-      }
-      try {
+    fetch(options.configUrl)
+      .then(response => {
+        if (!response.ok) {
+           throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.text();
+      })
+      .then(body => {
         fs.writeFileSync(filePath, body, 'utf8');
         run.start(options);
-      } catch (err) {
-        writeConsoleLog('error',{component: CONSOLE_LOG_TAG_COMP},"config file could not be written: " + err);
+      })
+      .catch(error => {
+        writeConsoleLog('error',{component: CONSOLE_LOG_TAG_COMP},"config file did not download or write: "+error);
         process.exit(1);
-      }
-    });
+      });
   } else {
     writeConsoleLog('error',{component: CONSOLE_LOG_TAG_COMP},"url protocol not supported: "+parsedUrl.protocol);
     process.exit(1);

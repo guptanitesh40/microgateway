@@ -1,0 +1,141 @@
+-e [INFO]: Successfully retrieve API Proxies list with code 200
+-e [INFO]: Successfully created API Proxy with code 201
+-e [INFO]: Successfully created API Proxy with code 201
+-e [INFO]: Successfully created API Proxy Bundle edgemicro_proxy_nightly.zip
+-e [INFO]: Successfully created API Proxy Bundle edgemicro_proxy_nightly_quota.zip
+-e [INFO]: Successfully updated API Proxy with code 200
+-e [INFO]: Successfully updated API Proxy with code 200
+-e [INFO]: Successfully deployed API Proxy with code 200
+-e [INFO]: Successfully deployed API Proxy with code 200
+-e [INFO]: Successfully retrieve API Proxy list with code 200
+-e [INFO]: --- Creating API Product ---
+-e [INFO]: Product Name: edgemicro_product_nightly
+-e [INFO]: Proxy Name 1: edgemicro_proxy_nightly
+-e [INFO]: Proxy Name 2: edgemicro_proxy_nightly_quota
+-e [INFO]: Generated JSON payload:
+-e [INFO]: Sending POST request to: https://api.enterprise.apigee.com/v1/o/connectors-test2/apiproducts
+-e [INFO]: Successfully created API Product with code 201
+-e [INFO]: Successfully retrieved API Product list with code 200
+-e [INFO]: Successfully retrieved developer list with code 200
+-e [INFO]: Successfully created developer with code 201
+-e [INFO]: Successfully retrieved developer with code 200
+-e [INFO]: Successfully retrieved developer app list with code 200
+-e [INFO]: Successfully created developer app with code 201
+-e [INFO]: Successfully retrieved developer app list with code 200
+-e [INFO]: Successfully retrieved developer app with code 200
+-e [INFO]: Install EMG
+-e [INFO]: EMG being run from local repository
+-e [INFO]: EMG version is current and Nodejs version is current
+-e [INFO]: Initialize EMG
+-e [INFO]: Initialize EMG with status 0
+-e [INFO]: Configure EMG
+-e [INFO]: Successfully configured EMG with status 0
+-e [INFO]: Verifying EMG configuration
+-e [INFO]: Successfully verifed EMG configuration with status 0
+-e [INFO]: Start EMG
+-e [INFO]: Successfully started EMG with status 0
+-e [INFO]: SetProductName Filter
+-e [INFO]: Successfully set product name filter with status 0
+-e [INFO]: Configure and Reload EMG
+-e [INFO]: Successfully reloaded EMG with status 0
+-e [INFO]: --- Testing API Proxy ---
+-e [INFO]: Successfully retrieved developer api key with code 200
+-e [INFO]: Received API Keys JSON: {
+  "consumerKey": "9GrJGvQolXTJGz1AkAKyIRBGrUGmsqLn",
+  "consumerSecret": "m2IfAWA0I5j1FMAg"
+}
+-e [INFO]: Extracted Consumer Key: 9GrJGvQolXTJGz1AkAKyIRBGrUGmsqLn
+-e [INFO]: Sending request to: http://localhost:8000/v1/edgemicro_proxy_nightly
+-e [INFO]: Successfully tested API Proxy with code 200
+-e [INFO]: Test Quota (1 request allowed, 10th should fail)
+-e [INFO]: Successfully retrieved developer api key with code 200
+-e [INFO]: Making API call #1
+-e [INFO]: Received HTTP status: 200
+-e [INFO]: Making API call #2
+-e [INFO]: Received HTTP status: 403
+-e [INFO]: Making API call #3
+-e [INFO]: Received HTTP status: 403
+-e [INFO]: Making API call #4
+-e [INFO]: Received HTTP status: 403
+-e [INFO]: Making API call #5
+-e [INFO]: Received HTTP status: 403
+-e [INFO]: Making API call #6
+-e [INFO]: Received HTTP status: 403
+-e [INFO]: Making API call #7
+-e [INFO]: Received HTTP status: 403
+-e [INFO]: Making API call #8
+-e [INFO]: Received HTTP status: 403
+-e [INFO]: Making API call #9
+-e [INFO]: Received HTTP status: 403
+-e [INFO]: Making API call #10
+-e [INFO]: Received HTTP status: 403
+-e [INFO]: Successfully tested quota: First 1 call passed (200 OK) and the last was blocked (403 Forbidden).
+-e [INFO]: Test Auth Token
+-e [INFO]: Successfully retrieved developer api key with code 200
+-e [INFO]: Successfully retrieved auth token with code 200
+-e [INFO]: Successfully tested and retrieved auth token
+-e [INFO]: Test Auth Token
+-e [INFO]: Successfully retrieved developer api key with code 200
+-e [INFO]: Successfully retrieved auth token with code 200
+-e [INFO]: Successfully tested API Proxy using auth token with code 200
+-e [INFO]: Test Invalid API Key
+-e [INFO]: Successfully tested invalid API Key with code 403
+-e [INFO]: Test Invalid API Key with useUpstreamResponse:true
+-e [INFO]: Successfully reloaded EMG with status 0
+-e [INFO]: Successfully tested invalid API Key with code 401
+-e [INFO]: Test Invalid API Key with useUpstreamResponse:false
+-e [INFO]: Successfully reloaded EMG with status 0
+-e [INFO]: Successfully tested invalid API Key with code 403
+-e [INFO]: Check if log file created
+-e [INFO]: Check if log file has error logs for invalid api key
+-e [INFO]: Check if info system logs are printed in log file
+-e [INFO]: Successfully reloaded EMG with status 0
+-e [INFO]: Successfully retrieved developer api key with code 200
+-e [INFO]: Check if debug system logs and event debug event logs are printed in log file
+-e [INFO]: Successfully reloaded EMG with status 0
+-e [INFO]: Successfully retrieved developer api key with code 200
+-e [INFO]: Check if trace event logs are printed in log file
+-e [INFO]: Successfully reloaded EMG with status 0
+-e [INFO]: Successfully retrieved developer api key with code 200
+-e [INFO]: Check if stack_trace config is working correctly
+-e [INFO]: Successfully reloaded EMG with status 0
+-e [INFO]: Successfully retrieved developer api key with code 200
+-e [INFO]: Check if stack_trace config is working correctly
+-e [INFO]: Successfully reloaded EMG with status 0
+-e [INFO]: Successfully retrieved developer api key with code 200
+-e [INFO]: Test Revoked API Key
+-e [INFO]: Successfully tested revoked API Key with code 403
+-e [INFO]: Test Invalid JWT
+-e [INFO]: Successfully tested invalid JWT with code 401
+-e [INFO]: Test Expired JWT
+-e [INFO]: Successfully tested expired JWT with code 401
+-e [INFO]: Set Invalid Product Name Filter
+-e [INFO]: Successfully set invalid product name filter with status 0
+-e [INFO]: Test Invalid Product Name Filter
+-e [INFO]: Successfully retrieved developer api key with code 200
+-e [INFO]: Successfully tested invalid product name filter with code 200
+-e [INFO]: Reset Invalid Product Name Filter
+-e [INFO]: Successfully set invalid product name filter with status 0
+-e [INFO]: Configure and Reload EMG for Public URL
+-e [INFO]: Successfully reloaded EMG for public url with status 0
+-e [INFO]: Test Invalid API Key with oauth.allowNoAuthorization: true && oauth.allowInvalidAuthorization: true
+-e [INFO]: Successfully tested public url with code 200
+-e [INFO]: Adding Zookeeper blocklist entry to /etc/hosts
+-e [INFO]: Successfully added Zookeeper blocklist entry
+-e [INFO]: Configure and Reload EMG
+-e [INFO]: Successfully reloaded EMG with status 0
+-e [INFO]: Test Zookeeper Downtime Resilience - Proxy should still work after EMG restart with blocked Zookeeper
+-e [INFO]: SUCCESS: Proxy still works after Zookeeper downtime simulation - code 200
+-e [INFO]: Removing Zookeeper blocklist entry from /etc/hosts
+-e [INFO]: Successfully removed Zookeeper blocklist entry
+-e [INFO]: Stop EMG
+-e [INFO]: Successfully stopped EMG with status 0
+-e [INFO]: Uninstall EMG
+-e [INFO]: Successfully uninstalled EMG with status 0
+-e [INFO]: Successfully delete developer app with code 200
+-e [INFO]: Successfully deleted API Product with code 200
+-e [INFO]: Successfully undeployed API Proxy with code 200
+-e [INFO]: Successfully undeployed API Proxy with code 200
+-e [INFO]: Successfully deleted API Proxy with code 200
+-e [INFO]: Successfully deleted API Proxy with code 200
+-e [INFO]: Successfully deleted developer with code 200
